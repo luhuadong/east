@@ -2,6 +2,10 @@
 
 A rpc tool for Linux machine which can be used to monitor, update, communication, and so on.
 
+```
+east tool ~('_')=====b
+```
+
 ### Dependency
 
 ```shell
@@ -33,4 +37,5 @@ You will get the json data like this.
 ### Reference
 
 - [jsonrpc-c](https://github.com/hmng/jsonrpc-c)
-- [lepd](https://github.com/luhuadong/lepd)
+- [lepd](https://github.com/linuxep/lepd)
+
