@@ -24,6 +24,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
+#include <openssl/md5.h>
 #include "jsonrpc-c.h"
 
 static int debug = 1; /* enable this to printf */
@@ -91,6 +92,30 @@ cJSON * add(jrpc_context * ctx, cJSON * params, cJSON *id)
     cJSON * a = cJSON_GetArrayItem(params,0);
     cJSON * b = cJSON_GetArrayItem(params,1);
     return cJSON_CreateNumber(a->valueint + b->valueint);
+}
+
+/*
+ * params:
+ *  - url
+ *  - md5sum
+ *  - save_path
+ */
+cJSON * download(jrpc_context * ctx, cJSON * params, cJSON *id)
+{
+    cJSON * url = cJSON_GetArrayItem(params,0);
+    cJSON * md5 = cJSON_GetArrayItem(params,1);
+    cJSON * path = cJSON_GetArrayItem(params,2);
+
+    DEBUG_PRINT("URL: %s\n", url->valuestring);
+    DEBUG_PRINT("md5sum: %s\n", md5->valuestring);
+    DEBUG_PRINT("save path: %s\n", path->valuestring);
+
+    size_t len = strlen(url->valuestring);
+    char cmd[len + 10];
+    snprintf(cmd, sizeof(cmd), "wget %s", url->valuestring);
+    system(cmd);
+
+    return cJSON_CreateString("Ok");
 }
 
 builtin_func_info* lookup_func(char* name)
@@ -176,6 +201,7 @@ int main(void)
     jrpc_register_procedure(&my_server, list_all,  "listAllMethod", NULL);
     jrpc_register_procedure(&my_server, read_proc, "getProcVersion", "version");
     jrpc_register_procedure(&my_server, add, "add", NULL );
+    jrpc_register_procedure(&my_server, download, "download", NULL );
     jrpc_register_procedure(&my_server, exit_server, "exit", NULL );
 
     jrpc_server_run(&my_server);
