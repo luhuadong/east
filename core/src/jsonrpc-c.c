@@ -24,14 +24,16 @@ static void jrpc_procedure_destroy(struct jrpc_procedure *procedure);
 struct ev_loop *loop;
 
 // get sockaddr, IPv4 or IPv6:
-static void *get_in_addr(struct sockaddr *sa) {
+static void *get_in_addr(struct sockaddr *sa)
+{
 	if (sa->sa_family == AF_INET) {
 		return &(((struct sockaddr_in*) sa)->sin_addr);
 	}
 	return &(((struct sockaddr_in6*) sa)->sin6_addr);
 }
 
-static int send_response(struct jrpc_connection * conn, char *response) {
+static int send_response(struct jrpc_connection * conn, char *response)
+{
 	int fd = conn->fd;
 	if (conn->debug_level > 1)
 		printf("JSON Response:\n%s\n", response);
@@ -40,8 +42,8 @@ static int send_response(struct jrpc_connection * conn, char *response) {
 	return 0;
 }
 
-static int send_error(struct jrpc_connection * conn, int code, char* message,
-		cJSON * id) {
+static int send_error(struct jrpc_connection * conn, int code, char* message, cJSON * id)
+{
 	int return_value = 0;
 	cJSON *result_root = cJSON_CreateObject();
 	cJSON *error_root = cJSON_CreateObject();
@@ -57,8 +59,8 @@ static int send_error(struct jrpc_connection * conn, int code, char* message,
 	return return_value;
 }
 
-static int send_result(struct jrpc_connection * conn, cJSON * result,
-		cJSON * id) {
+static int send_result(struct jrpc_connection * conn, cJSON * result, cJSON * id)
+{
 	int return_value = 0;
 	cJSON *result_root = cJSON_CreateObject();
 	if (result)
@@ -73,7 +75,8 @@ static int send_result(struct jrpc_connection * conn, cJSON * result,
 }
 
 static int invoke_procedure(struct jrpc_server *server,
-		struct jrpc_connection * conn, char *name, cJSON *params, cJSON *id) {
+		struct jrpc_connection * conn, char *name, cJSON *params, cJSON *id)
+{
 	cJSON *returned = NULL;
 	int procedure_found = 0;
 	jrpc_context ctx;
@@ -100,7 +103,8 @@ static int invoke_procedure(struct jrpc_server *server,
 }
 
 static int eval_request(struct jrpc_server *server,
-		struct jrpc_connection * conn, cJSON *root) {
+		struct jrpc_connection * conn, cJSON *root)
+{
 	cJSON *method, *params, *id;
 	method = cJSON_GetObjectItem(root, "method");
 	if (method != NULL && method->type == cJSON_String) {
@@ -129,14 +133,16 @@ static int eval_request(struct jrpc_server *server,
 	return -1;
 }
 
-static void close_connection(struct ev_loop *loop, ev_io *w) {
+static void close_connection(struct ev_loop *loop, ev_io *w)
+{
 	ev_io_stop(loop, w);
 	close(((struct jrpc_connection *) w)->fd);
 	free(((struct jrpc_connection *) w)->buffer);
 	free(((struct jrpc_connection *) w));
 }
 
-static void connection_cb(struct ev_loop *loop, ev_io *w, int revents) {
+static void connection_cb(struct ev_loop *loop, ev_io *w, int revents)
+{
 	struct jrpc_connection *conn;
 	struct jrpc_server *server = (struct jrpc_server *) w->data;
 	size_t bytes_read = 0;
@@ -206,7 +212,8 @@ static void connection_cb(struct ev_loop *loop, ev_io *w, int revents) {
 
 }
 
-static void accept_cb(struct ev_loop *loop, ev_io *w, int revents) {
+static void accept_cb(struct ev_loop *loop, ev_io *w, int revents)
+{
 	char s[INET6_ADDRSTRLEN];
 	struct jrpc_connection *connection_watcher;
 	connection_watcher = malloc(sizeof(struct jrpc_connection));
@@ -239,13 +246,15 @@ static void accept_cb(struct ev_loop *loop, ev_io *w, int revents) {
 	}
 }
 
-int jrpc_server_init(struct jrpc_server *server, int port_number) {
+int jrpc_server_init(struct jrpc_server *server, int port_number)
+{
     loop = EV_DEFAULT;
     return jrpc_server_init_with_ev_loop(server, port_number, loop);
 }
 
 int jrpc_server_init_with_ev_loop(struct jrpc_server *server, 
-        int port_number, struct ev_loop *loop) {
+        int port_number, struct ev_loop *loop)
+{
 	memset(server, 0, sizeof(struct jrpc_server));
 	server->loop = loop;
 	server->port_number = port_number;
@@ -259,7 +268,8 @@ int jrpc_server_init_with_ev_loop(struct jrpc_server *server,
 	return __jrpc_server_start(server);
 }
 
-static int __jrpc_server_start(struct jrpc_server *server) {
+static int __jrpc_server_start(struct jrpc_server *server)
+{
 	int sockfd;
 	struct addrinfo hints, *servinfo, *p;
 	struct sockaddr_in sockaddr;
@@ -340,16 +350,19 @@ static int __jrpc_server_start(struct jrpc_server *server) {
   #define EV_BREAK ev_break
 #endif
 
-void jrpc_server_run(struct jrpc_server *server){
+void jrpc_server_run(struct jrpc_server *server)
+{
 	EV_RUN(server->loop, 0);
 }
 
-int jrpc_server_stop(struct jrpc_server *server) {
+int jrpc_server_stop(struct jrpc_server *server)
+{
 	EV_BREAK(server->loop, EVBREAK_ALL);
 	return 0;
 }
 
-void jrpc_server_destroy(struct jrpc_server *server){
+void jrpc_server_destroy(struct jrpc_server *server)
+{
 	/* Don't destroy server */
 	int i;
 	for (i = 0; i < server->procedure_count; i++){
@@ -358,7 +371,8 @@ void jrpc_server_destroy(struct jrpc_server *server){
 	free(server->procedures);
 }
 
-static void jrpc_procedure_destroy(struct jrpc_procedure *procedure){
+static void jrpc_procedure_destroy(struct jrpc_procedure *procedure)
+{
 	if (procedure->name){
 		free(procedure->name);
 		procedure->name = NULL;
@@ -370,7 +384,8 @@ static void jrpc_procedure_destroy(struct jrpc_procedure *procedure){
 }
 
 int jrpc_register_procedure(struct jrpc_server *server,
-		jrpc_function function_pointer, char *name, void * data) {
+		jrpc_function function_pointer, char *name, void * data)
+{
 	int i = server->procedure_count++;
 	if (!server->procedures)
 		server->procedures = malloc(sizeof(struct jrpc_procedure));
@@ -389,7 +404,8 @@ int jrpc_register_procedure(struct jrpc_server *server,
 	return 0;
 }
 
-int jrpc_deregister_procedure(struct jrpc_server *server, char *name) {
+int jrpc_deregister_procedure(struct jrpc_server *server, char *name)
+{
 	/* Search the procedure to deregister */
 	int i;
 	int found = 0;

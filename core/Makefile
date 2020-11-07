@@ -6,7 +6,7 @@ SRCS=$(wildcard *.c */*.c)
 OBJS=$(patsubst %.c, %.o, $(SRCS))
 
 FLAG = -g
-CFLAGS := -lev -lm
+CFLAGS := -lev -lm -lpthread
 NAME=$(wildcard *.c)
 #TARGET=$(patsubst %.c, %, $(NAME))
 TARGET=east
