@@ -1,0 +1,16 @@
+import os
+import sys
+
+env   = Environment()
+cwd   = os.getcwd()
+
+src   = ['server.c']
+src  += Glob('src/cJSON.c')
+src  += Glob('src/jsonrpc-c.c')
+
+path  = [cwd + '/inc']
+
+env["CFLAGS"]    = ["-lev", "-lm", "-lpthread"]
+env["LINKFLAGS"] = ["-lev", "-lm", "-lpthread"]
+
+env.Program('east', src, CPPPATH = path)

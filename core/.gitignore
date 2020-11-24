@@ -1,3 +1,4 @@
 *.o
 jsonrpc-c/
 
+.sconsign.dblite
